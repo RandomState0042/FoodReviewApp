@@ -1,6 +1,8 @@
+// App.js
 import React, { useState, useEffect } from 'react';
-import { View, Button, Alert } from 'react-native';
+import { View, Alert } from 'react-native';
 import { GoogleSignin, GoogleSigninButton, statusCodes } from '@react-native-google-signin/google-signin';
+import HomeScreen from './screens/HomeScreen';
 
 GoogleSignin.configure({
   webClientId: '193894574586-0720t243ddimj8gntekm344priaq47u8.apps.googleusercontent.com',
@@ -8,11 +10,16 @@ GoogleSignin.configure({
 
 const App = () => {
   const [loggedIn, setLoggedIn] = useState(false);
+  const [userInfo, setUserInfo] = useState(null);
 
   useEffect(() => {
     const checkLoggedInStatus = async () => {
       const isUserSignedIn = await GoogleSignin.isSignedIn();
-      setLoggedIn(isUserSignedIn);
+      if (isUserSignedIn) {
+        const userInfo = await GoogleSignin.getCurrentUser();
+        setLoggedIn(true);
+        setUserInfo(userInfo);
+      }
     };
 
     checkLoggedInStatus();
@@ -23,18 +30,10 @@ const App = () => {
       await GoogleSignin.hasPlayServices();
       const userInfo = await GoogleSignin.signIn();
       setLoggedIn(true);
-      Alert.alert('Success', `Welcome ${userInfo.user.name}!`);
+      setUserInfo(userInfo);
+      // Alert.alert('Success', `Welcome ${userInfo.user.name}!`);
     } catch (error) {
-      if (error.code === statusCodes.SIGN_IN_CANCELLED) {
-        Alert.alert('Cancelled', 'Google sign in was cancelled');
-      } else if (error.code === statusCodes.IN_PROGRESS) {
-        Alert.alert('Sign in in progress', 'Google sign in is already in progress');
-      } else if (error.code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE) {
-        Alert.alert('Play services not available', 'Please ensure Google Play Services are installed');
-      } else {
-        Alert.alert('Error', 'An error occurred while signing in with Google');
-        console.error(error);
-      }
+      console.log(error);
     }
   };
 
@@ -43,15 +42,16 @@ const App = () => {
       await GoogleSignin.revokeAccess();
       await GoogleSignin.signOut();
       setLoggedIn(false);
+      setUserInfo(null);
     } catch (error) {
-      console.error(error);
+      console.log(error);
     }
   };
 
   return (
     <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
       {loggedIn ? (
-        <Button title="Sign Out" onPress={signOut} />
+        <HomeScreen userInfo={userInfo} onSignOut={signOut} />
       ) : (
         <GoogleSigninButton
           style={{ width: 192, height: 48 }}

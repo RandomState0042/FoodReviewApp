@@ -1672,6 +1672,11 @@
     prompts "^2.4.2"
     semver "^7.5.2"
 
+"@react-native-community/geolocation@^3.2.0":
+  version "3.2.0"
+  resolved "https://registry.npmjs.org/@react-native-community/geolocation/-/geolocation-3.2.0.tgz"
+  integrity sha512-WkOjeDRBOdbor6YlKusEPkBx64x+Qf4enldF2tvCHyaXr0YcqdWXPZMMePIXUvQvyyuP5atnfPT5D2Q9VSx5mQ==
+
 "@react-native-firebase/app@^19.0.1":
   version "19.0.1"
   resolved "https://registry.npmjs.org/@react-native-firebase/app/-/app-19.0.1.tgz"
