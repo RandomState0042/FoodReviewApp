@@ -3,11 +3,11 @@ import { View, TextInput, Button, StyleSheet, Text, Image, Alert, ScrollView} fr
 import Geolocation from '@react-native-community/geolocation';
 import ProductCard from '../components/ProductCard';
 
-const HomeScreen = ({ userInfo, onSignOut }) => {
+const HomeScreen = ({ userInfo}) => {
   const [currentLocation, setCurrentLocation] = useState('');
     const [products, setProducts] = useState([]);
   useEffect(() => {
-    // requestLocationPermission();
+    requestLocationPermission();
     generateRandomProducts();
   }, []);
 
@@ -30,18 +30,46 @@ const HomeScreen = ({ userInfo, onSignOut }) => {
     );
   };
 
-  const getCurrentLocation = () => {
+ const getCurrentLocation = () => {
+  try {
     Geolocation.getCurrentPosition(
       position => {
         const { latitude, longitude } = position.coords;
         setCurrentLocation(`Latitude: ${latitude}, Longitude: ${longitude}`);
       },
       error => {
-        console.error(error);
+        switch (error.code) {
+          case 1:
+            Alert.alert(
+              'Location Permission Denied',
+              'Please enable location permissions to use this feature.',
+              [
+                { text: 'OK', onPress: () => console.log('OK Pressed') }
+              ],
+              { cancelable: false }
+            );
+            break;
+          case 2:
+            console.log("Position unavailable");
+            break;
+          case 3:
+            console.log("Location request timed out");
+            break;
+          case 4:
+            console.log("Activity is null");
+            break;
+          default:
+            console.log("Unknown error occurred");
+        }
       },
       { enableHighAccuracy: true, timeout: 20000, maximumAge: 1000 }
     );
-  };
+  } catch (error) {
+    console.log("Error getting location:", error.message);
+  }
+};
+
+
 
 const generateRandomProducts = () => {
     // Generate random products data
@@ -79,11 +107,11 @@ const generateRandomProducts = () => {
           style={styles.searchBox}
           placeholder="Search..."
         />
-        <Button title="Sign Out" onPress={onSignOut} />
       </View>
       {/* bottomhalf */}
         <View style={styles.bottomHalf}>
-            <View style={styles.rowone}>
+            <ScrollView vertical>
+                <View style={styles.rowone}>
                 <ScrollView horizontal contentContainerStyle={styles.productContainer}>
                     {products.map((product, index) => (
                         <ProductCard key={index} product={product} />
@@ -97,6 +125,14 @@ const generateRandomProducts = () => {
                     ))}
                 </ScrollView>
             </View>
+            <View style={styles.rowtwo}>
+                <ScrollView horizontal contentContainerStyle={styles.productContainer}>
+                    {products.map((product, index) => (
+                        <ProductCard key={index} product={product} />
+                    ))}
+                </ScrollView>
+            </View>
+            </ScrollView>
         </View>
     </View>
   );
@@ -118,7 +154,7 @@ const styles = StyleSheet.create({
     flexGrow: 4,
   },
   upperHalf: {
-    flex: 0.7,
+    flex: 0.3,
     padding: '2%',
     alignItems: 'center',
     backgroundColor: '#f0f0f0',
